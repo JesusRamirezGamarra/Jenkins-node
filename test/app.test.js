@@ -1,22 +1,28 @@
-const express = require('express');
-const app = express();
+const request = require('supertest');
+const app = require('../index');
 
-// Definición de rutas
-app.get('/api/hello', (req, res) => {
-    res.json({ message: 'Hola mundo!' });
+
+beforeAll(() => {
+    server = app.listen(3000);
 });
 
-app.get('/api/message', (req, res) => {
-    res.json({ message: 'Endpoint de message!' });
-});
+afterAll(() => {
+    server.close();
+})
 
-// Exporta la app para pruebas
-module.exports = app;
 
-// Opcional: inicia el servidor solo si no es un módulo
-if (require.main === module) {
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => {
-        console.log(`Servidor ejecutándose en el puerto ${port}`);
-    });
-}
+describe('GET /api/hello', () => {
+    it('deberia retornar un json mensaje de hola mundo', async () => {
+        const response = await request(app).get('/api/hello');
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message', 'Hola mundo!');
+    })
+})
+
+describe('GET /api/message', () => {
+    it('deberia retornar un mensaje', async () => {
+        const response = await request(app).get('/api/message');
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message', 'Endpoint de message!');
+    })
+})

@@ -11,8 +11,10 @@ app.get('/api/message', (req, res) => {
     res.json({message: 'Endpoint de message!'});
 })
 
-app.listen(PORT, () => {
-    console.log('Server running on port:', PORT)
-})
-
 module.exports = app;
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log('Server running on port:', PORT)
+    })
+}

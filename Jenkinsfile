@@ -1,11 +1,6 @@
 pipeline {
     agent none
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') // Credenciales para Docker Hub
-        DOCKER_REPO = 'fercdevv/jenkins-node'                      // Repositorio en Docker Hub
-    }
-
     stages {
         stage('Instalar dependencias...') {
             agent {
@@ -14,7 +9,7 @@ pipeline {
                 }
             }
             steps {
-                echo 'Instalando dependencias...'
+                echo 'Listando todas las carpetas y archivos...'
                 sh 'npm install'
             }
         }
@@ -26,12 +21,12 @@ pipeline {
                 }
             }
             steps {
-                echo 'Ejecutando pruebas...'
+                echo 'Listando todas las carpetas y archivos...'
                 sh 'npm run test'
             }
         }
 
-        stage('Construir y pushear imagen a Docker Hub') {
+        stage('Construir y pushear imagen a dockerhub') {
             when {
                 branch 'develop'
             }
@@ -39,19 +34,19 @@ pipeline {
             agent {
                 docker {
                     image 'docker:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
 
+            environment {
+                    DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+                    DOCKER_REPO = 'jesusramirezgamarra/jenkins-node'
+            }
             steps {
-                script {
-                    echo 'Construyendo y publicando imagen...'
-                    sh '''
-                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker build -t $DOCKER_REPO:latest .
-                    docker push $DOCKER_REPO:latest
-                    '''
-                }
+                sh '''
+                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                docker build -t $DOCKER_REPO:latest .
+                docker push $DOCKER_REPO:latest
+                '''
             }
         }
     }
