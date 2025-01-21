@@ -36,7 +36,7 @@ pipeline {
                     image 'docker:latest'
                 }
             }
-
+     
             environment {
                     DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
                     DOCKER_REPO = 'jesusramirezgamarra/jenkins-node'
@@ -51,3 +51,5 @@ pipeline {
         }
     }
 }
+
+
