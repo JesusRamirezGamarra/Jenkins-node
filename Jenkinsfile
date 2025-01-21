@@ -13,7 +13,7 @@ pipeline {
                 sh 'npm install'
             }
         }
-
+ 
         stage('Ejecutar tests...') {
             agent {
                 docker {
