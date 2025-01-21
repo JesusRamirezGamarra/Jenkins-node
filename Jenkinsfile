@@ -1,6 +1,11 @@
 pipeline {
     agent none
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') // Credenciales para Docker Hub
+        DOCKER_REPO = 'fercdevv/jenkins-node'                      // Repositorio en Docker Hub
+    }
+
     stages {
         stage('Instalar dependencias...') {
             agent {
@@ -9,7 +14,7 @@ pipeline {
                 }
             }
             steps {
-                echo 'Listando todas las carpetas y archivos...'
+                echo 'Instalando dependencias...'
                 sh 'npm install'
             }
         }
@@ -21,12 +26,12 @@ pipeline {
                 }
             }
             steps {
-                echo 'Listando todas las carpetas y archivos...'
+                echo 'Ejecutando pruebas...'
                 sh 'npm run test'
             }
         }
 
-        stage('Construir y pushear imagen a dockerhub') {
+        stage('Construir y pushear imagen a Docker Hub') {
             when {
                 branch 'develop'
             }
@@ -34,14 +39,13 @@ pipeline {
             agent {
                 docker {
                     image 'docker:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
+            }
 
-                environment {
-                    DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-                    DOCKER_REPO = 'fercdevv/jenkins-node'
-                }
-
-                steps {
+            steps {
+                script {
+                    echo 'Construyendo y publicando imagen...'
                     sh '''
                     echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
                     docker build -t $DOCKER_REPO:latest .
